@@ -40,8 +40,18 @@ bulletXchange = 0
 bulletYchange = 5
 bulletState = "ready"
 # bullets = []
-score = 0
+# score = 0
 
+score_value = 0
+font = pygame.font.Font("freesansbold.ttf", 32)
+
+textX = 10
+textY = 10
+
+def show_score(x, y):
+    score = font.render("Score: " + str(score_value), True, (255, 255, 255))
+    screen.blit(score, (x, y))
+    
 def player(x, y):
     screen.blit(playerIMG, (x, y))
 
@@ -119,8 +129,7 @@ while running:
         if collision:
             bulletY = 480
             bulletState = "ready"
-            score += 1
-            print(score)
+            score_value += 1
             enemyX[i] = random.randint(0, 735)
             enemyY[i] = random.randint(50, 150)
             
@@ -134,6 +143,7 @@ while running:
     if bulletState is "fire":
         fire(bulletX, bulletY)
         bulletY -= bulletYchange
-        
+    
+    show_score(textX, textY)
     player(playerX, playerY)
     pygame.display.update()
