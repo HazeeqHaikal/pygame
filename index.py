@@ -1,4 +1,5 @@
 # from turtle import Screen
+import math
 import pygame
 import random
 
@@ -17,11 +18,20 @@ playerY = 480
 playerXchange = 0
 # playerYchange = 0
 
-enemyIMG = pygame.image.load('asteroid.png')
-enemyX = random.randint(0, 800)
-enemyY = random.randint(50, 150)
-enemyXchange = 2
-enemyYchange = 30
+enemyIMG = []
+enemyX = []
+enemyY = []
+enemyYchange = []
+enemyXchange = []
+
+numOfEnemies = 6
+
+for i in range(numOfEnemies):
+    enemyIMG.append(pygame.image.load('asteroid.png'))
+    enemyX.append(random.randint(0, 735))
+    enemyY.append(random.randint(50, 150))
+    enemyXchange.append(2)
+    enemyYchange.append(30)
 
 bulletIMG = pygame.image.load('bullet.png')
 bulletX = 0
@@ -30,12 +40,13 @@ bulletXchange = 0
 bulletYchange = 5
 bulletState = "ready"
 # bullets = []
+score = 0
 
 def player(x, y):
     screen.blit(playerIMG, (x, y))
 
-def enemy(x, y):
-    screen.blit(enemyIMG, (x, y))
+def enemy(x, y, i):
+    screen.blit(enemyIMG[i], (x, y))
 
 def fire(x, y):
     global bulletState
@@ -43,6 +54,13 @@ def fire(x, y):
     screen.blit(bulletIMG, (x+16, y+10))
     # return x, y
 
+def isCollision(enemyX, enemyY, bulletX, bulletY):
+    distance = math.sqrt((math.pow(enemyX - bulletX, 2)) + (math.pow(enemyY - bulletY, 2)))
+    if distance < 27:
+        return True
+    else:
+        return False
+    
 running = True
 while running:
     screen.fill((0, 0, 0))
@@ -60,7 +78,7 @@ while running:
             if event.key == pygame.K_RIGHT:
                 playerXchange = 5
             
-            if event.key == pygame.K_SPACE and bulletState is "ready":
+            if event.key == pygame.K_SPACE and bulletState == "ready":
                 bulletX = playerX
                 fire(bulletX, bulletY)
                 # bullets.append(fire(bulletX, bulletY))
@@ -88,15 +106,27 @@ while running:
         playerX = 736    
     # playerY += playerYchang
     
-    enemyX += enemyXchange
+    for i in range(numOfEnemies):
+        enemyX[i] += enemyXchange[i]
+        if enemyX[i] <= 0:
+            enemyXchange[i] = 2
+            enemyY[i] += enemyYchange[i]
+        elif enemyX[i] >= 736:
+            enemyXchange[i] = -2 
+            enemyY[i] += enemyYchange[i]
     
-    if enemyX <= 0:
-        enemyXchange = 2
-        enemyY += enemyYchange
-    elif enemyX >= 736:
-        enemyXchange = -2 
-        enemyY += enemyYchange 
-    
+        collision = isCollision(enemyX[i], enemyY[i], bulletX, bulletY)
+        if collision:
+            bulletY = 480
+            bulletState = "ready"
+            score += 1
+            print(score)
+            enemyX[i] = random.randint(0, 735)
+            enemyY[i] = random.randint(50, 150)
+            
+        enemy(enemyX[i], enemyY[i], i)
+            
+            
     if bulletY <= 0:
         bulletY = 480
         bulletState = "ready"
@@ -104,7 +134,6 @@ while running:
     if bulletState is "fire":
         fire(bulletX, bulletY)
         bulletY -= bulletYchange
-    
+        
     player(playerX, playerY)
-    enemy(enemyX, enemyY)
     pygame.display.update()
